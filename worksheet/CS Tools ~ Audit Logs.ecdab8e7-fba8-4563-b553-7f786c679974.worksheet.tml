@@ -1,0 +1,112 @@
+guid: ecdab8e7-fba8-4563-b553-7f786c679974
+model:
+  name: CS Tools ~ Audit Logs
+  description: |-
+    !!! BETA !!!
+
+    For more information: https://developers.thoughtspot.com/docs/logs-api
+  model_tables:
+  - name: TS_AUDIT_LOGS
+    fqn: 9151e184-cbed-4472-8e70-7b8bee00fc18
+    joins:
+    - with: TS_CLUSTER
+      referencing_join: TS_AUDIT_LOGS_to_TS_CLUSTER
+    - with: TS_ORG
+      referencing_join: TS_AUDIT_LOGS_to_TS_ORG
+    - with: TS_USER
+      referencing_join: TS_AUDIT_LOGS_to_TS_USER
+  - name: TS_CLUSTER
+    fqn: 71bfdc02-2147-4105-a052-bea08770f2b2
+  - name: TS_ORG
+    fqn: bb641bca-b8f3-4b96-a159-5a8632e50a45
+  - name: TS_USER
+    fqn: 143ff846-08bb-40cc-a7db-d50e8f587983
+  formulas:
+  - id: Events
+    name: Events
+    expr: count ( [TS_AUDIT_LOGS::SK_DUMMY] )
+  - id: fx Log Details JSON
+    name: fx Log Details JSON
+    expr: group_aggregate ( sql_string_aggregate_op ( 'parse_json ( {0} )' , [TS_AUDIT_LOGS::Log Details] ) , query_groups ( ) + { [TS_AUDIT_LOGS::Log Details] } , query_filters ( ) )
+  - id: fx Timestamp
+    name: fx Timestamp
+    expr: '[TS_AUDIT_LOGS::Timestamp]'
+  columns:
+  - name: Log Type
+    description: The name of the event generated.
+    column_id: TS_AUDIT_LOGS::Log Type
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Event
+  - name: Timestamp
+    description: Datetime of when the event took place
+    formula_id: fx Timestamp
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+  - name: Log Details
+    formula_id: fx Log Details JSON
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+  - name: Events
+    formula_id: Events
+    properties:
+      column_type: MEASURE
+      aggregation: SUM
+      index_type: DONT_INDEX
+  - name: Log Type Description
+    description: A unique description of the event.
+    column_id: TS_AUDIT_LOGS::Log Type Description
+    properties:
+      column_type: ATTRIBUTE
+      synonyms:
+      - Event Description
+  - name: ThoughtSpot URL
+    description: The web address of your ThoughtSpot platform.
+    column_id: TS_CLUSTER::ThoughtSpot URL
+    properties:
+      column_type: ATTRIBUTE
+  - name: ThoughtSpot Timezone
+    description: The system timezone configured for your ThoughtSpot platform.
+    column_id: TS_CLUSTER::ThoughtSpot Timezone
+    properties:
+      column_type: ATTRIBUTE
+  - name: Org ID
+    description: The unique identifier of the org.
+    column_id: TS_ORG::Org ID
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+  - name: Org
+    description: The organization name found in the ThoughtSpot UI, either in the switcher or on the Administrator panel.
+    column_id: TS_ORG::Org
+    properties:
+      column_type: ATTRIBUTE
+  - name: User GUID
+    description: The unique identifier of the user.
+    column_id: TS_USER::User GUID
+    properties:
+      column_type: ATTRIBUTE
+      index_type: DONT_INDEX
+  - name: Username
+    description: The user's unqiue internal name.
+    column_id: TS_USER::Username
+    properties:
+      column_type: ATTRIBUTE
+  - name: User Email
+    description: The user's registered email.
+    column_id: TS_USER::User Email
+    properties:
+      column_type: ATTRIBUTE
+  - name: User
+    description: The user's display name.
+    column_id: TS_USER::User
+    properties:
+      column_type: ATTRIBUTE
+  properties:
+    is_bypass_rls: false
+    join_progressive: true
+    sage_config:
+      is_sage_enabled: false
